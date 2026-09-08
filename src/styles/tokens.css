@@ -1,0 +1,81 @@
+/**
+ * Design tokens. There's no component library here (see README decision log) -- these
+ * custom properties are the whole "theme". Colours were chosen for contrast first:
+ * every text/background pairing below meets WCAG AA (4.5:1 for body text, 3:1 for
+ * large text and UI borders) at the sizes they're actually used at.
+ */
+:root {
+  /* Colour: a small clinical-neutral palette. One accent (teal), one danger (red),
+     one warning (amber), rest are greys. */
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-border: #cbd2d9;
+  --color-border-strong: #8a97a6;
+  --color-text: #1a2027;
+  --color-text-muted: #4b5563;
+  --color-accent: #0d6b6b;
+  --color-accent-strong: #084f4f;
+  --color-accent-contrast: #ffffff;
+  --color-danger: #b3261e;
+  --color-danger-bg: #fdecea;
+  --color-danger-border: #f2b8b5;
+  --color-warning: #7a4f01;
+  --color-warning-bg: #fff4e0;
+  --color-warning-border: #f3d38a;
+  --color-success: #1e6b3a;
+  --color-success-bg: #e8f5ec;
+  --color-focus-ring: #0d6b6b;
+
+  /* Spacing scale, 4px base. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Typography: system font stack -- a ward tablet on patchy wifi shouldn't wait on a
+     webfont download for an internal tool. */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --line-height-base: 1.5;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 32, 0.08);
+  --shadow-md: 0 4px 12px rgba(16, 24, 32, 0.12);
+
+  /* Touch targets: ward tablets are touch-first, so interactive elements target 44px. */
+  --tap-target: 44px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #14181c;
+    --color-surface: #1d2329;
+    --color-border: #3a4450;
+    --color-border-strong: #5b6774;
+    --color-text: #eef1f4;
+    --color-text-muted: #b7c0ca;
+    --color-accent: #3fb6b6;
+    --color-accent-strong: #6fd0d0;
+    --color-accent-contrast: #06201f;
+    --color-danger: #ff8a80;
+    --color-danger-bg: #3a1f1d;
+    --color-danger-border: #5c2b27;
+    --color-warning: #f0c674;
+    --color-warning-bg: #3a2f14;
+    --color-warning-border: #5c4a1f;
+    --color-success: #7bd39a;
+    --color-success-bg: #17301f;
+    --color-focus-ring: #6fd0d0;
+    color-scheme: dark;
+  }
+}
