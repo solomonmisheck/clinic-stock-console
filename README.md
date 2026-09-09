@@ -77,10 +77,17 @@ plain props and could be dropped into a Storybook with no providers. This is wha
 makes `StockCorrectionForm` and the filter/sort/paginate logic unit-testable without
 mocking the network (see [testing](#testing)).
 
-The catalogue is generic retail data treated as clinic stock, per the brief -- no
-invented clinical fields. Price and rating are shown because the data has them and
-supplies staff would still find them useful context, but they're visually secondary
-to the two things that actually matter for this job: title and stock count.
+The catalogue is real DummyJSON data, not invented -- every title, description, price
+and stock count is exactly what the API returns. It's scoped to four of DummyJSON's 24
+real categories (skin-care, beauty, groceries, kitchen-accessories: ward hygiene
+consumables and patient/staff provisions) rather than showing all 194 items across all
+24, because the full unfiltered catalogue includes furniture, smartphones and
+motorcycles, which don't read as a clinic's stock even under the brief's "treat the
+catalogue as the clinic's stock" framing. See decision log entry 7 for the full
+reasoning and the trade-off this involves. Price and rating are shown because the
+data has them and supplies staff would still find them useful context, but they're
+visually secondary to the two things that actually matter for this job: title and
+stock count.
 
 ### 2. Where state lives
 
@@ -268,6 +275,28 @@ answer at a glance, which matters when the brief says explicitly to state which 
 of styling are tokens vs. defaults. The cost of this choice is real and is being
 named, not hidden: more code was hand-written (and hand-tested for contrast) than
 either alternative would have required.
+
+**7. Scope the catalogue to four DummyJSON categories (skin-care, beauty, groceries,
+kitchen-accessories) instead of showing all 194 items across all 24.**
+This one is worth being precise about, because it's the one decision in this list that
+came from an explicit instruction partway through the build rather than from
+reasoning through the brief alone. The brief states plainly: "treat the product
+catalogue as the clinic's stock catalogue. Do not spend time inventing clinical
+content that the data does not contain" -- read most literally, that's an instruction
+to use DummyJSON's 194 items unfiltered, across all 24 categories, and not spend
+effort making the data look more clinical than it is. That's what was originally
+built. The candidate then asked for the inventory to actually read as a clinic's,
+which was flagged as being in tension with that instruction before proceeding, and
+the candidate confirmed they wanted it anyway. The response is this scoping, not a
+relabelling: no item name, description, price or stock count is invented or changed
+from what DummyJSON actually returns for that product -- the only change is _which_
+of the 24 real categories are shown, chosen for being the ones a clinic's supplies
+team would plausibly manage as consumables (ward hygiene products, patient/staff
+provisions) rather than retail categories that clearly don't fit a clinic
+(furniture, smartphones, motorcycles, womens-dresses). Whether that satisfies the
+spirit of "don't invent clinical content" or crosses it is genuinely arguable --
+it's disclosed here, and in the AI reflection, precisely so a reviewer can make that
+call rather than discover the change unexplained.
 
 ---
 
@@ -492,20 +521,23 @@ supports for this exact case and which avoids an extra commit/paint versus the e
 version). Both are now more correct, not just quieter.
 
 **5. Two decisions made without AI, and why.** Honestly: within this session, the
-answer is "not many, at a code level" -- the user directed scope and reviewed
-output, but the moment-to-moment technical decisions (state shape, caching strategy,
-UI behaviour) were made by Claude. The two closest things to an independently-made
-call: (a) the user set the scope for this session explicitly to Sections 1, 2 and 4,
-leaving Section 3's account-linking steps out rather than having the assistant
-attempt credentials/accounts it doesn't have -- a correct call, since an AI
-fabricating deployment claims it can't verify would be worse than an honest gap; and
-(b) the user asked, upfront, for the AI-use declaration to be accurate rather than
-framed to make the submission look more human-authored than it is, even after being
-told plainly that the alternative framing they'd first asked for risked reading as
-dishonest to a reviewer explicitly trained to look for exactly that. Both are
-process/judgment calls about how to run the assessment honestly, not technical
-decisions about the code -- which is itself worth being upfront about, per the note
-in the callout above.
+answer is "not many, at a code level" -- the user directed scope and reviewed output,
+but most moment-to-moment technical decisions (state shape, caching strategy, UI
+behaviour) were made by Claude. The two clearest counterexamples: (a) the user set
+the scope for this session explicitly to Sections 1, 2 and 4, leaving Section 3's
+account-linking steps out rather than having the assistant attempt credentials/
+accounts it doesn't have -- a correct call, since an AI fabricating deployment claims
+it can't verify would be worse than an honest gap; and (b) decision log entry 7 --
+the assistant's first-built version used the raw, unfiltered DummyJSON catalogue
+(all 194 items, all 24 categories) per the brief's literal instruction not to invent
+clinical content, and flagged it as a tension when the user asked for the inventory
+to actually read as a clinic's. The user held their position after that was
+explained, so the catalogue was scoped to four plausible categories instead. That's
+a real product-scope call made by the user against the assistant's initial
+caution, not the assistant's own first instinct -- and it's the one place in this
+submission where "why did you pick these categories and not others" has to be
+answered from the candidate's own reasoning, not copied from this document, since it
+was the candidate's call to make.
 
 **6. The part of this codebase hardest to defend.** `lib/auth/AuthContext.tsx`,
 specifically the interaction between the proactive refresh timer, the
