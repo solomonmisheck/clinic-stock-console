@@ -314,7 +314,7 @@ this isn't in the docs at all:
 
 ### Testing
 
-21 tests across 4 files, concentrated on the logic that's easy to get wrong rather
+23 tests across 5 files, concentrated on the logic that's easy to get wrong rather
 than shallow coverage of everything:
 
 - `lib/stock/__tests__/listParams.test.ts` -- URL parse/serialize round-tripping,
@@ -329,6 +329,12 @@ than shallow coverage of everything:
   save/error/retry behaviour end to end at the component level (pending-disables,
   failure keeps the typed value and offers retry without retyping, client-side
   validation blocks an invalid save).
+- `routes/__tests__/StockListPage.test.tsx` -- mounts the real stock list with the
+  catalogue fetch mocked to fail the way a live `/http/500` does, asserting the error
+  state renders with a working retry that recovers, plus the empty-state case with
+  zero matching items. This is the one that directly exercises requirement 4
+  ("test the error path against `/http/500`") as an automated test rather than only
+  a manual check.
 
 Run with `npm run test` (or `npm run test:watch` / `npm run test:ui`).
 
@@ -428,11 +434,14 @@ Live and wired up. One manual step is still open, noted below.
   this to be my own first draft, with AI used afterwards only to pressure-test it --
   that's not how this went, and I'd rather say so than have it come up in the live
   session unprepared.
-- _Section 2 (Build):_ Nearly all of the code -- routing, the auth/refresh mutex, the
-  filter/sort/paginate logic, the design-token CSS, the UI primitives, the test
-  suite, and the tooling configuration (ESLint flat config, Prettier, Husky,
-  commitlint). This is squarely inside what the brief calls "use freely" --
-  scaffolding, boilerplate, tests once scope is decided, tooling setup.
+- _Section 2 (Build):_ I used Claude Code to generate essentially all of it --
+  routing, the auth/refresh mutex, the filter/sort/paginate logic, the design-token
+  CSS, the UI primitives, the test suite, and the tooling configuration (ESLint flat
+  config, Prettier, Husky, commitlint) -- then reviewed the diffs and ran the full
+  check suite (format, lint, typecheck, test, build) myself before treating anything
+  as done, rather than accepting output unread. This is squarely inside what the
+  brief calls "use freely": scaffolding, boilerplate, tests once scope is decided,
+  tooling setup.
 - _Section 3 (CI/CD):_ The GitHub Actions workflow and the SPA-rewrite configs were
   written by Claude, which also diagnosed and fixed the blank-page bug on first
   deploy (missing `netlify.toml`) and pushed the fix. Creating GitHub accounts,
