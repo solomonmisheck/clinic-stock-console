@@ -7,7 +7,12 @@ Informatics web engineer take-home assessment.
 
 - **Repository:** <https://github.com/solomonmisheck/clinic-stock-console>
 - **Live app:** <https://clinicstock-console.netlify.app>
-- **Time spent:** (log this yourself, honestly, per the brief -- reviewing this, personalising Section 1/4, and getting it deployed all count)
+- **Time spent:** ~8 hours, across three sessions fit around a full-time job -- Tuesday
+  (Sept 8): reading the brief in full, probing the DummyJSON API, and building the
+  core app (auth, stock list, item detail, stock correction, tooling, tests).
+  Wednesday (Sept 9): revisiting the catalogue category scope and rewriting the
+  README. Monday (Sept 14): pushing to GitHub, deploying, fixing the Netlify build
+  bug, and setting up and proving out CI/CD and branch protection.
 
 I used Claude heavily throughout this build, including to draft this document.
 That's declared properly, section by section, in [Section 4](#section-4--ai-reflection) --
@@ -416,10 +421,17 @@ Live, wired up, and demonstrated end to end, not just configured.
 - **Branch protection on `main`** requires the `checks` job to pass before merging.
   Demonstrated, not just configured: PR #1 (`chore/pin-node-version`) ran the full
   check suite, Netlify posted its deploy preview automatically, and the merge button
-  only unlocked once every check was green. That PR's merge is what's currently
-  live -- the deploy after it was confirmed with the same checks as the initial
-  deploy: root, built JS/CSS assets, and a direct load of `/items/1` (the deep-link
-  requirement) all return 200.
+  only unlocked once every check was green.
+- **A gap found and closed in this same setup:** GitHub branch protection exempts the
+  repo owner by default -- a direct push to `main` from the owner's own account still
+  gets through even with the rule on, unless "do not allow bypassing the above
+  settings" is also checked. The first version of this rule didn't have that box
+  checked, and a follow-up direct push landed successfully with a warning
+  ("Bypassed rule violations... Required status check is expected") rather than being
+  rejected. Checking that box and re-testing confirmed the fix: a second direct push
+  attempt was rejected outright (`GH006: Protected branch update failed`,
+  `[remote rejected]`), with no warning and no way around it. The gate now applies
+  to every push to `main`, not just ones from outside contributors.
 
 - **Branch that triggers deployment:** `main`
 - **Public URL:** <https://clinicstock-console.netlify.app>
