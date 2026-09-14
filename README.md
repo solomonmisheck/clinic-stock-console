@@ -6,7 +6,7 @@ the system. Built against [DummyJSON](https://dummyjson.com/docs) for the Savann
 Informatics web engineer take-home assessment.
 
 - **Repository:** <https://github.com/solomonmisheck/clinic-stock-console>
-- **Live app:** _not yet deployed_ -- see [Section 3](#section-3--deployment--cicd-status) for what's done and what's left
+- **Live app:** <https://clinicstock-console.netlify.app>
 - **Time spent:** (log this yourself, honestly, per the brief -- reviewing this, personalising Section 1/4, and getting it deployed all count)
 
 I used Claude heavily throughout this build, including to draft this document.
@@ -386,34 +386,35 @@ throttle requests with `?delay=`.
 
 ## Section 3 -- Deployment & CI/CD (status)
 
-I haven't finished this part -- not an oversight, a scope call. Connecting a
-GitHub/GitLab repo and a hosting provider needs my own accounts, and I built this
-README and codebase in a session before doing that. Everything I could prepare
-without those accounts is done:
+Live and wired up. One manual step is still open, noted below.
 
-- **CI workflow written:** `.github/workflows/ci.yml`. On every pull request into
-  `main`: install, `format:check`, `lint`, `typecheck`, `test`, `build` (one job),
-  plus a separate `commitlint` job that lints every commit added in the PR against
-  Conventional Commits. Either job failing fails the PR's checks.
-- **SPA-fallback rewrite configs included** for the two most likely static hosts --
-  `vercel.json` and `public/_redirects` (Netlify) -- because `/items/:id` is
-  client-side-routed; without a rewrite, a direct load or reload on that URL 404s on
-  a plain static host. Whichever provider I end up on, I need to confirm it's
-  honouring one of these before relying on the "paste this link" requirement.
-- **Deploy is left to the provider's own git integration**, not a step inside
-  `ci.yml`: connect the repo in Vercel/Netlify's dashboard, point its production
-  branch at `main`, and it deploys automatically on every push to `main` -- which
-  only happens via a merged PR once branch protection requires the `checks` job
-  above to pass. That's "the pipeline" the brief asks for, split across two tools on
-  purpose (GitHub Actions as the gate, the host as the deploy), which is genuinely
-  how most small teams run this.
-
-**Still to do:** push to GitHub, connect the repo on my chosen host, point its
-production branch at `main`, add branch protection requiring the `checks` job, then
-fill in the repo/live-app links at the top of this README and the two lines below.
+- **Repo:** pushed to GitHub, `main` as the default branch.
+- **CI:** `.github/workflows/ci.yml` runs on every pull request into `main`:
+  install, `format:check`, `lint`, `typecheck`, `test`, `build` in one job, plus a
+  separate `commitlint` job that lints every commit added in the PR against
+  Conventional Commits. Either job failing fails the PR's checks. The first push to
+  `main` ran the `checks` job successfully; `commitlint` correctly no-ops on a direct
+  push since it's scoped to pull request events.
+- **Hosting:** deployed on Netlify, connected to the GitHub repo via its native git
+  integration, production branch `main` -- pushing to `main` triggers a fresh build
+  and deploy automatically, no step inside `ci.yml` needed for that part.
+- **One bug found and fixed during this deploy:** the site initially came up blank.
+  Netlify was serving `index.html` straight from the repo root
+  (`<script src="/src/main.tsx">`), not the built output in `dist/` -- nothing was
+  telling it to actually run the build. Root cause was that the site's build
+  settings weren't configured; fixed by committing an explicit `netlify.toml`
+  (`command = "npm run build"`, `publish = "dist"`, plus the SPA-fallback redirect),
+  which took effect on the next push. Confirmed after the fix: the root, the built
+  JS/CSS assets, and a direct load of `/items/1` (the deep-link requirement) all
+  return 200 and serve the real app, not a 404 or a blank shell.
+- **Still open:** branch protection on `main` requiring the `checks` job to pass
+  before merging. I don't have GitHub API/CLI credentials in this environment to set
+  that myself -- it's a repo Settings → Branches → Add rule action, a couple of
+  clicks in the GitHub UI. Until that's on, the CI gate runs and reports status, but
+  nothing stops a direct push (or a merge) from landing even if it fails.
 
 - **Branch that triggers deployment:** `main`
-- **Public URL:** _pending -- see above_
+- **Public URL:** <https://clinicstock-console.netlify.app>
 
 ---
 
@@ -432,8 +433,12 @@ fill in the repo/live-app links at the top of this README and the two lines belo
   suite, and the tooling configuration (ESLint flat config, Prettier, Husky,
   commitlint). This is squarely inside what the brief calls "use freely" --
   scaffolding, boilerplate, tests once scope is decided, tooling setup.
-- _Section 3 (CI/CD):_ The GitHub Actions workflow and the SPA-rewrite configs. The
-  account-linking steps weren't done, as noted above.
+- _Section 3 (CI/CD):_ The GitHub Actions workflow and the SPA-rewrite configs were
+  written by Claude, which also diagnosed and fixed the blank-page bug on first
+  deploy (missing `netlify.toml`) and pushed the fix. Creating GitHub accounts,
+  adding the SSH key, creating the repo, and signing up for and clicking through
+  Netlify's import flow were mine -- those needed my own accounts and browser.
+  Branch protection on `main` is still outstanding; I need to add that myself.
 - _Section 4 (this section):_ Drafted with AI too, from an accurate account of how
   the session actually went.
 
