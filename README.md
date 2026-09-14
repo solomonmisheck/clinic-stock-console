@@ -363,8 +363,9 @@ Run with `npm run test` (or `npm run test:watch` / `npm run test:ui`).
 ## Running locally
 
 ```bash
+nvm use             # optional -- matches Node to what CI runs (.nvmrc)
 npm install
-npm run dev        # http://localhost:5173
+npm run dev          # http://localhost:5173
 ```
 
 Sign in with any user from <https://dummyjson.com/users> -- `emilys` / `emilyspass`
@@ -392,32 +393,33 @@ throttle requests with `?delay=`.
 
 ## Section 3 -- Deployment & CI/CD (status)
 
-Live and wired up. One manual step is still open, noted below.
+Live, wired up, and demonstrated end to end, not just configured.
 
 - **Repo:** pushed to GitHub, `main` as the default branch.
 - **CI:** `.github/workflows/ci.yml` runs on every pull request into `main`:
   install, `format:check`, `lint`, `typecheck`, `test`, `build` in one job, plus a
   separate `commitlint` job that lints every commit added in the PR against
-  Conventional Commits. Either job failing fails the PR's checks. The first push to
-  `main` ran the `checks` job successfully; `commitlint` correctly no-ops on a direct
-  push since it's scoped to pull request events.
+  Conventional Commits. Either job failing fails the PR's checks.
 - **Hosting:** deployed on Netlify, connected to the GitHub repo via its native git
   integration, production branch `main` -- pushing to `main` triggers a fresh build
-  and deploy automatically, no step inside `ci.yml` needed for that part.
+  and deploy automatically, no step inside `ci.yml` needed for that part. Netlify
+  also builds an isolated deploy preview for every open PR automatically, which
+  turned out to be a nice bonus for review: you can click through a PR's actual
+  rendered app before merging it, not just read the diff.
 - **One bug found and fixed during this deploy:** the site initially came up blank.
   Netlify was serving `index.html` straight from the repo root
   (`<script src="/src/main.tsx">`), not the built output in `dist/` -- nothing was
   telling it to actually run the build. Root cause was that the site's build
   settings weren't configured; fixed by committing an explicit `netlify.toml`
   (`command = "npm run build"`, `publish = "dist"`, plus the SPA-fallback redirect),
-  which took effect on the next push. Confirmed after the fix: the root, the built
-  JS/CSS assets, and a direct load of `/items/1` (the deep-link requirement) all
-  return 200 and serve the real app, not a 404 or a blank shell.
-- **Still open:** branch protection on `main` requiring the `checks` job to pass
-  before merging. I don't have GitHub API/CLI credentials in this environment to set
-  that myself -- it's a repo Settings → Branches → Add rule action, a couple of
-  clicks in the GitHub UI. Until that's on, the CI gate runs and reports status, but
-  nothing stops a direct push (or a merge) from landing even if it fails.
+  which took effect on the next push.
+- **Branch protection on `main`** requires the `checks` job to pass before merging.
+  Demonstrated, not just configured: PR #1 (`chore/pin-node-version`) ran the full
+  check suite, Netlify posted its deploy preview automatically, and the merge button
+  only unlocked once every check was green. That PR's merge is what's currently
+  live -- the deploy after it was confirmed with the same checks as the initial
+  deploy: root, built JS/CSS assets, and a direct load of `/items/1` (the deep-link
+  requirement) all return 200.
 
 - **Branch that triggers deployment:** `main`
 - **Public URL:** <https://clinicstock-console.netlify.app>
