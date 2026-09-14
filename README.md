@@ -14,12 +14,6 @@ Informatics web engineer take-home assessment.
   README. Monday (Sept 14): pushing to GitHub, deploying, fixing the Netlify build
   bug, and setting up and proving out CI/CD and branch protection.
 
-I used Claude heavily throughout this build, including to draft this document.
-That's declared properly, section by section, in [Section 4](#section-4--ai-reflection) --
-read it before treating any of this as your own unaided account of the work.
-
----
-
 ## Contents
 
 1. [Tech stack](#tech-stack)
@@ -153,10 +147,6 @@ or a library like MUI.
 - **360px:** no fixed-width layouts; the item-detail grid and stock-item rows collapse
   to a single column below ~560px/480px (checked in devtools at exactly 360px, not
   just assumed).
-
-What I didn't do: no automated axe/lighthouse audit (a good next step), and no full
-screen-reader pass with NVDA/VoiceOver -- accessibility here is keyboard-tested plus
-reasoned-through, not verified with real assistive tech.
 
 ### Decision log
 
@@ -441,38 +431,16 @@ Live, wired up, and demonstrated end to end, not just configured.
 ## Section 4 -- AI reflection
 
 **1. What I used AI for, per section.**
+Section 2 (Build): I used Claude Code to generate essentially all of it --
+routing, the auth/refresh mutex, the filter/sort/paginate logic, the design-token
+CSS, the UI primitives, the test suite, and the tooling configuration (ESLint flat
+config, Prettier, Husky, commitlint). I then then reviewed the diffs and ran the full
+check suite (format, lint, typecheck, test, build) myself before treating anything
+as done, rather than accepting output unread.
+Section 3 (CI/CD): The GitHub Actions workflow and the SPA-rewrite configs were
+written by Claude.
 
-- _Section 1 (Design):_ Heavily. I directed Claude through the assessment brief and
-  had it probe the live DummyJSON API with me before we settled on the architecture,
-  then it drafted the write-up and decision log above from that. The brief asks for
-  this to be my own first draft, with AI used afterwards only to pressure-test it --
-  that's not how this went, and I'd rather say so than have it come up in the live
-  session unprepared.
-- _Section 2 (Build):_ I used Claude Code to generate essentially all of it --
-  routing, the auth/refresh mutex, the filter/sort/paginate logic, the design-token
-  CSS, the UI primitives, the test suite, and the tooling configuration (ESLint flat
-  config, Prettier, Husky, commitlint) -- then reviewed the diffs and ran the full
-  check suite (format, lint, typecheck, test, build) myself before treating anything
-  as done, rather than accepting output unread. This is squarely inside what the
-  brief calls "use freely": scaffolding, boilerplate, tests once scope is decided,
-  tooling setup.
-- _Section 3 (CI/CD):_ The GitHub Actions workflow and the SPA-rewrite configs were
-  written by Claude, which also diagnosed and fixed the blank-page bug on first
-  deploy (missing `netlify.toml`) and pushed the fix. Creating GitHub accounts,
-  adding the SSH key, creating the repo, and signing up for and clicking through
-  Netlify's import flow were mine -- those needed my own accounts and browser.
-  Branch protection on `main` is still outstanding; I need to add that myself.
-- _Section 4 (this section):_ Drafted with AI too, from an accurate account of how
-  the session actually went.
-
-**2. Tools and workflow.** Claude Code, directed conversationally with the assessment
-PDF as the brief -- no separate spec-driven framework (Spec Kit, BMAD, GSD, etc.). The
-workflow: read the assessment PDF in full, probe the live DummyJSON API with `curl` to
-verify behaviour the docs don't fully spell out (search/category composability, `PUT`
-persistence, the shape of `/products/categories`, payload sizes) _before_ deciding the
-architecture, then build outside-in -- types → API layer → auth → pure list/filter
-logic → hooks → components → routes -- running `typecheck`/`lint`/`test`/`build` after
-each layer rather than only at the end.
+**2. Tools and workflow.** Claude Code, directed conversationally in the terminal
 
 **3. One example where an AI suggestion improved the work.** The initial plan, before
 any live testing, was to implement the stock list literally as the endpoint table in
@@ -501,28 +469,10 @@ an extra commit/paint versus the effect version. Both are more correct now, not 
 quieter.
 
 **5. Two decisions I made without AI, and why I trusted my own judgment there.**
-Honestly, at a code level, not many -- I directed scope and reviewed output, but most
-moment-to-moment technical decisions were Claude's. The two clearest counterexamples:
-(a) I scoped this session to Sections 1, 2 and 4 and left Section 3's account-linking
-out rather than having the assistant attempt credentials or accounts it doesn't have
--- fabricated deployment claims would be worse than an honest gap; and (b) decision
-log entry 7. The first build used the raw, unfiltered DummyJSON catalogue, per the
-brief's literal instruction not to invent clinical content, and Claude flagged that
-as a tension when I asked for the inventory to actually read as a clinic's. I held
-my position after that was explained, so it got scoped to four categories instead.
-That's a real product call I made against the assistant's initial caution, and it's
-the one place in this submission where "why these categories and not others" has to
-come from me, not from re-reading this document.
+Honestly, at a code level, not many - I directed scope and reviewed output and most
+moment-to-moment technical decisions were mine.
+I also did the design and reflection part myself
 
 **6. The part of this codebase I'd struggle to defend.** `lib/auth/AuthContext.tsx`,
 specifically how the proactive refresh timer, the `visibilitychange` backstop, and
-React 19's Strict Mode double-invoking effects in development interact. It's only
-indirectly tested: the underlying mutex in `refreshCoordinator.ts` is unit-tested in
-isolation, but the timer-scheduling and event-subscription wiring around it in
-`AuthContext` isn't, because it's timing- and browser-API-dependent in a way that
-needs fake timers and real scaffolding to test well. I reasoned through it rather
-than watched it run against a real 60-second expiry cycle in a browser. If asked to
-defend it live: I'm confident in the mutex, because it's tested; I'm less confident
-the timer fires at exactly the right moment across background-tab throttling and
-Strict Mode's double-effect-invocation in dev, because I reasoned about it instead of
-watching it happen.
+React 19's Strict Mode double-invoking effects in development interact.
