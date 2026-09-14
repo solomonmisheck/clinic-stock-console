@@ -5,7 +5,7 @@ catalogue, open an item, and correct its count when a physical count disagrees w
 the system. Built against [DummyJSON](https://dummyjson.com/docs) for the Savannah
 Informatics web engineer take-home assessment.
 
-- **Repository:** (fill in once pushed to GitHub/GitLab)
+- **Repository:** <https://github.com/solomonmisheck/clinic-stock-console>
 - **Live app:** _not yet deployed_ -- see [Section 3](#section-3--deployment--cicd-status) for what's done and what's left
 - **Time spent:** (log this yourself, honestly, per the brief -- reviewing this, personalising Section 1/4, and getting it deployed all count)
 
